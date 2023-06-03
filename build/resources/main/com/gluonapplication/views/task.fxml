@@ -1,39 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.gluonhq.charm.glisten.control.BottomNavigation?>
-<?import com.gluonhq.charm.glisten.control.BottomNavigationButton?>
-<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.control.*?>
 <?import com.gluonhq.charm.glisten.mvc.View?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
-
 <View fx:id="tertiary" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="350.0" stylesheets="@secondary.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonapplication.Presenters.TaskPresenter">
     <bottom>
         <TitledPane animated="false" prefHeight="259.0" prefWidth="350.0" text="Tasks" BorderPane.alignment="CENTER">
-            <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="234.0" prefWidth="348.0">
-                    <children>
-                        <TableView fx:id="TaskTable" prefWidth="700.0">
-                            <columns>
-                                <TableColumn fx:id="BestellNrColumn" prefWidth="75.0" text="C1" />
-                                <TableColumn fx:id="BestellDatumColumn" prefWidth="75.0" text="C2" />
-                                <TableColumn fx:id="BestellMengeColumn" prefWidth="75.0" text="C3" />
-                                <TableColumn fx:id="ArtikelNrColumn" prefWidth="75.0" text="C4" />
-                                <TableColumn fx:id="BezeichnungColumn" prefWidth="75.0" text="C5" />
-                            </columns>
-                        </TableView>
-                    </children>
-                </AnchorPane>
-            </content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="234.0" prefWidth="348.0">
+                <TableView fx:id="TaskTable" prefWidth="700.0">
+
+                </TableView>
+            </AnchorPane>
         </TitledPane>
     </bottom>
     <top>
