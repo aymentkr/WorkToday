@@ -47,11 +47,9 @@
    <bottom>
       <TitledPane animated="false" prefHeight="227.0" prefWidth="350.0" text="Employees" BorderPane.alignment="CENTER">
          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="234.0" prefWidth="348.0">
-            <children>
-               <TableView fx:id="EmployeesTable" prefWidth="700.0">
+            <TableView fx:id="EmployeesTable" prefWidth="700.0">
 
-               </TableView>
-            </children>
+            </TableView>
          </AnchorPane>
       </TitledPane>
    </bottom>
