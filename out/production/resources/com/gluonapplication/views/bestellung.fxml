@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.control.BottomNavigation?>
+<?import com.gluonhq.charm.glisten.control.BottomNavigationButton?>
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.control.TextField?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
+
+<View fx:id="secondary" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="350.0" stylesheets="@secondary.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonapplication.views.BestellungPresenter">
+   <bottom>
+      <TitledPane animated="false" prefHeight="259.0" prefWidth="350.0" text="Posten/Artikel" BorderPane.alignment="CENTER">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="234.0" prefWidth="348.0">
+               <children>
+                  <TableView fx:id="PostenArtikelTable" prefHeight="218.0" prefWidth="700.0">
+                     <columns>
+                        <TableColumn fx:id="BestellNrColumn" prefWidth="75.0" text="C1" />
+                        <TableColumn fx:id="BestellDatumColumn" prefWidth="75.0" text="C2" />
+                        <TableColumn fx:id="BestellMengeColumn" prefWidth="75.0" text="C3" />
+                        <TableColumn fx:id="ArtikelNrColumn" prefWidth="75.0" text="C4" />
+                        <TableColumn fx:id="BezeichnungColumn" prefWidth="75.0" text="C5" />
+                     </columns>
+                  </TableView>
+               </children>
+            </AnchorPane>
+         </content>
+      </TitledPane>
+   </bottom>
+   <top>
+      <GridPane prefHeight="272.0" prefWidth="350.0" BorderPane.alignment="CENTER">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <TextField fx:id="BestellNr" GridPane.columnIndex="1" />
+            <TextField fx:id="Bestelldatum" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="Lieferdatum" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="Rechnungsbetrag" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="BestellNr" textAlignment="CENTER" wrappingWidth="175.0" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Bestelldatum" textAlignment="CENTER" wrappingWidth="175.0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Lieferdatum" textAlignment="CENTER" wrappingWidth="175.0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Rechnungsbetrag" textAlignment="CENTER" wrappingWidth="175.0" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+         </children>
+      </GridPane>
+   </top>
+   <center>
+      <BottomNavigation prefHeight="77.0" prefWidth="350.0" BorderPane.alignment="CENTER">
+         <actionItems>
+            <BottomNavigationButton fx:id="prevButton" onAction="#handlePrevious">
+               <graphic>
+                  <Icon content="NAVIGATE_BEFORE" />
+               </graphic>
+            </BottomNavigationButton>
+            <BottomNavigationButton fx:id="nextButton" onAction="#handleNext">
+               <graphic>
+                  <Icon content="NAVIGATE_NEXT" />
+               </graphic>
+            </BottomNavigationButton>
+            <BottomNavigationButton onAction="#handleAdd" selected="true" text="Add">
+               <graphic>
+                  <Icon content="ADD" />
+               </graphic>
+            </BottomNavigationButton>
+            <BottomNavigationButton onAction="#handleEdit" prefHeight="44.0" prefWidth="117.0" text="Edit">
+               <graphic>
+                  <Icon content="EDIT" />
+               </graphic>
+            </BottomNavigationButton>
+            <BottomNavigationButton onAction="#handleDelete" text="Delete">
+               <graphic>
+                  <Icon content="DELETE" />
+               </graphic>
+            </BottomNavigationButton>
+         </actionItems>
+      </BottomNavigation>
+   </center>
+</View>
