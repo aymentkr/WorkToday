@@ -1,14 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import com.gluonhq.charm.glisten.control.BottomNavigation?>
+<?import com.gluonhq.charm.glisten.control.BottomNavigationButton?>
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.gluonapplication.Presenters.TaskPresenter"
-            prefHeight="400.0" prefWidth="600.0">
-
-</AnchorPane>
+<View fx:id="tertiary" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="350.0" stylesheets="@secondary.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonapplication.Presenters.TaskPresenter">
+    <bottom>
+        <TitledPane animated="false" prefHeight="259.0" prefWidth="350.0" text="Tasks" BorderPane.alignment="CENTER">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="234.0" prefWidth="348.0">
+                <TableView fx:id="TaskTable" prefWidth="700.0">
+                    <columns>
+                        <TableColumn fx:id="BestellNrColumn" prefWidth="75.0" text="C1"/>
+                        <TableColumn fx:id="BestellDatumColumn" prefWidth="75.0" text="C2"/>
+                        <TableColumn fx:id="BestellMengeColumn" prefWidth="75.0" text="C3"/>
+                        <TableColumn fx:id="ArtikelNrColumn" prefWidth="75.0" text="C4"/>
+                        <TableColumn fx:id="BezeichnungColumn" prefWidth="75.0" text="C5"/>
+                    </columns>
+                </TableView>
+            </AnchorPane>
+        </TitledPane>
+    </bottom>
+    <top>
+        <GridPane prefHeight="259.0" prefWidth="350.0" BorderPane.alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="170.20001220703125" minWidth="10.0" prefWidth="122.99999237060547" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="252.60004425048828" minWidth="10.0" prefWidth="227.00000762939453" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="108.5999969482422" minHeight="10.0" prefHeight="56.60000076293946" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="201.5999992370606" minHeight="10.0" prefHeight="201.5999992370606" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Describe the Task" textAlignment="CENTER" wrappingWidth="122.20001220703125" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <TextArea fx:id="task" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="name" GridPane.columnIndex="1" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="For" textAlignment="CENTER" wrappingWidth="88.5999755859375" GridPane.halignment="CENTER" />
+            </children>
+        </GridPane>
+    </top>
+    <center>
+        <BottomNavigation prefHeight="88.0" prefWidth="350.0" BorderPane.alignment="CENTER">
+            <actionItems>
+                <BottomNavigationButton onAction="#handleAdd" prefHeight="112.0" prefWidth="117.0" selected="true" text="Add">
+                    <graphic>
+                        <Icon content="ADD" />
+                    </graphic>
+                </BottomNavigationButton>
+                <BottomNavigationButton onAction="#handleEdit" prefHeight="44.0" prefWidth="117.0" text="Edit">
+                    <graphic>
+                        <Icon content="EDIT" />
+                    </graphic>
+                </BottomNavigationButton>
+                <BottomNavigationButton onAction="#handleDelete" text="Delete">
+                    <graphic>
+                        <Icon content="DELETE" />
+                    </graphic>
+                </BottomNavigationButton>
+            </actionItems>
+        </BottomNavigation>
+    </center>
+</View>

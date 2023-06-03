@@ -4,6 +4,7 @@ import com.gluonapplication.Service.dbConnection;
 import com.gluonapplication.views.DepartmentView;
 import com.gluonapplication.views.EmployeeView;
 import com.gluonapplication.views.LoginView;
+import com.gluonapplication.views.TaskView;
 import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.visual.Swatch;
 import javafx.application.Application;
@@ -30,7 +31,7 @@ public class MainApplication extends Application {
         appManager.addViewFactory(LOGIN_VIEW, () -> new LoginView().getView());
         appManager.addViewFactory(EMPLOYEE_VIEW, () -> new EmployeeView().getView());
         appManager.addViewFactory(DEPARTMENT_VIEW, () -> new DepartmentView().getView());
-        appManager.addViewFactory(TASK_VIEW, () -> new DepartmentView().getView());
+        appManager.addViewFactory(TASK_VIEW, () -> new TaskView().getView());
         DrawerManager.buildDrawer(appManager);
     }
 
