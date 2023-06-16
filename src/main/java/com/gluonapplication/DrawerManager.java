@@ -44,7 +44,8 @@ public class DrawerManager {
         final Item DepartmentItem = new ViewItem("Department", MaterialDesignIcon.DASHBOARD.graphic(), DEPARTMENT_VIEW);
         final Item TaskItem = new ViewItem("Task", MaterialDesignIcon.DONE.graphic(), TASK_VIEW);
         final Item LoginItem = new ViewItem("Login", MaterialDesignIcon.GRID_ON.graphic(), LOGIN_VIEW);
-        drawer.getItems().addAll(EmployeeItem, DepartmentItem, TaskItem, LoginItem);
+        final Item HiringItem = new ViewItem("Hiring", MaterialDesignIcon.WORK.graphic(), HIRING_VEIW);
+        drawer.getItems().addAll(EmployeeItem, DepartmentItem, TaskItem, HiringItem, LoginItem);
                 if (Platform.isDesktop()) {
             final Item logOutItem = new Item("Log Out", MaterialDesignIcon.GRID_OFF.graphic());
             final Item quitItem = new Item("Quit", MaterialDesignIcon.EXIT_TO_APP.graphic());

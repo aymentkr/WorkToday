@@ -11,9 +11,7 @@ import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 
 import java.sql.*;
 import java.util.List;
@@ -23,7 +21,11 @@ public class TaskPresenter {
     private final dbConnection connection = MainApplication.getConnection();
     private String TaskID;
     @FXML
-    private TableView<DatabaseDTO> TaskTable;
+    private TableView<DatabaseDTO> TaskTable,AssignTable;
+    @FXML
+    private DatePicker date;
+    @FXML
+    private CheckBox status;
     @FXML
     private ComboBox name;
     @FXML
@@ -50,12 +52,26 @@ public class TaskPresenter {
                         displayEmployees();
                         displayTaskTable();
                         displayRowData();
+                        displayAssignTable();
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
         });
+    }
+
+    private void displayAssignTable() {
+        try {
+            String query = "SELECT * FROM EmployeeTaskAssignments";
+            connection.prepareTable(query,AssignTable);
+            List<DatabaseDTO> resultList = connection.executeQuery(query);
+            ObservableList<DatabaseDTO> data = FXCollections.observableArrayList(resultList);
+            AssignTable.setItems(data);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // handle the exception
+        }
     }
 
     private void displayEmployees() throws SQLException {
@@ -75,7 +91,7 @@ public class TaskPresenter {
         }
     }
 
-    private void displayTaskTable() throws SQLException {
+    private void displayTaskTable() {
         try {
             String query = "SELECT * FROM tasks";
             connection.prepareTable(query,TaskTable);
@@ -113,12 +129,31 @@ public class TaskPresenter {
                     stmt.setString(2, DepartmentIdStr);
                     stmt.setString(3, EmployeeIDStr);
                     stmt.executeUpdate();
+
                     Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task added successfully.");
                     alert.showAndWait();
                     displayTaskTable();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+            }
+            try {
+                String sql = "INSERT INTO EmployeeTaskAssignments (employee_id,task_id,date_assigned, status) VALUES (?,?,?,?)";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, EmployeeIDStr);
+                stmt.setString(2, getTaskID());
+                stmt.setString(3, String.valueOf(Date.valueOf(date.getValue())));
+                if (status.isSelected())
+                    stmt.setString(4, "Completed");
+                else
+                    stmt.setString(4, "In Progress ..");
+                stmt.executeUpdate();
+
+                Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "New Assignment added successfully.");
+                alert.showAndWait();
+                displayAssignTable();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
         else {
@@ -198,16 +233,25 @@ public class TaskPresenter {
       if (connection.getUserRole() == dbConnection.UserRole.ADMIN) {
             try {
                 // Prepare the delete statement
+                String sql2 = "DELETE FROM EmployeeTaskAssignments WHERE task_id = ?";
+                PreparedStatement stmt2 = conn.prepareStatement(sql2);
+                stmt2.setString(1, TaskID);
+                // Execute the delete statement
+                int rowsDeleted2 = stmt2.executeUpdate();
+
+                // Prepare the delete statement
                 String sql = "DELETE FROM tasks WHERE task_id = ?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, TaskID);
 
                 // Execute the delete statement
                 int rowsDeleted = stmt.executeUpdate();
-                if (rowsDeleted > 0) {
+                if (rowsDeleted > 0 && rowsDeleted2>0) {
                     task.setText("");
+                    status.setSelected(false);
                     Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task deleted successfully.");
                     alert.showAndWait();
+                    displayAssignTable();
                     displayTaskTable();
                 }
             } catch (SQLException e) {
@@ -219,6 +263,22 @@ public class TaskPresenter {
             Alert alert = new Alert(javafx.scene.control.Alert.AlertType.WARNING, "You don't have permission to add, edit or delete!");
             alert.showAndWait();
         }
+    }
+    private String getTaskID() {
+        if (TaskID == null) {
+            try {
+                String query = "SELECT task_id FROM tasks WHERE task_name = ?";
+                PreparedStatement statement = conn.prepareStatement(query);
+                statement.setString(1, task.getText().trim());
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getString("task_id");
+                } else return null;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else return TaskID;
     }
 }
 

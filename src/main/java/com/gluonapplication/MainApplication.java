@@ -1,10 +1,7 @@
 package com.gluonapplication;
 
 import com.gluonapplication.Service.dbConnection;
-import com.gluonapplication.views.DepartmentView;
-import com.gluonapplication.views.EmployeeView;
-import com.gluonapplication.views.LoginView;
-import com.gluonapplication.views.TaskView;
+import com.gluonapplication.views.*;
 import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.visual.Swatch;
 import javafx.application.Application;
@@ -22,6 +19,8 @@ public class MainApplication extends Application {
     public static final String EMPLOYEE_VIEW = "Employee View";
     public static final String DEPARTMENT_VIEW = "Department View";
     public static final String TASK_VIEW = "Task View";
+    public static final String HIRING_VEIW = "Hiring View";
+
 
     private final AppManager appManager = AppManager.initialize(this::postInit);
     private static final dbConnection dbc = new dbConnection();
@@ -32,6 +31,7 @@ public class MainApplication extends Application {
         appManager.addViewFactory(EMPLOYEE_VIEW, () -> new EmployeeView().getView());
         appManager.addViewFactory(DEPARTMENT_VIEW, () -> new DepartmentView().getView());
         appManager.addViewFactory(TASK_VIEW, () -> new TaskView().getView());
+        appManager.addViewFactory(HIRING_VEIW,() ->new HiringView().getView());
         DrawerManager.buildDrawer(appManager);
     }
 

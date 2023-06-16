@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<View fx:id="hiring" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="350.0" stylesheets="@secondary.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonapplication.Presenters.HiringPresenter">
+   <top>
+        <TitledPane animated="false" text="EmployeeDepartment" BorderPane.alignment="CENTER" />
+   </top>
+   <center>
+            <TableView fx:id="EmpDepTable" BorderPane.alignment="CENTER">
+
+                        </TableView>
+   </center>
+</View>

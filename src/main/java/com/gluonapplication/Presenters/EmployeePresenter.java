@@ -16,6 +16,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeePresenter {
@@ -27,7 +28,7 @@ public class EmployeePresenter {
     private TableView<DatabaseDTO> EmployeesTable;
 
     @FXML
-    private TextField name,age,phone_number,address,email;
+    private TextField name,age,phone_number,address,email,position;
     @FXML
     private ComboBox department;
 
@@ -108,6 +109,20 @@ public class EmployeePresenter {
         }
         return departmentId;
     }
+    private String getEmployeeID() {
+        try {
+            String query = "SELECT employee_id FROM employee WHERE name = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, name.getText().trim());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getString("employee_id");
+            } else
+                return EmployeeID;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private String getDepartmentName(String departmentId) {
         // Retrieve the department ID based on the department name from the database
         String departmentName = null;
@@ -153,7 +168,7 @@ public class EmployeePresenter {
             String EmailStr = email.getText().trim();
             String PhoneNumberStr = phone_number.getText().trim();
             String DepartmentIdStr = getDepartmentId(department.getValue().toString());
-
+            String PositionStr = position.getText().trim();
             try {
                 String sql = "INSERT INTO employee (name, age, address, phone_number, email, department_id) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement stmt = conn.prepareStatement(sql);
@@ -169,6 +184,19 @@ public class EmployeePresenter {
                 displayEmployeesTable();
             } catch (SQLException e) {
                 e.printStackTrace();
+            }
+            try {
+                String sql = "INSERT INTO EmployeeDepartment (employee_id, department_id, join_date, position) VALUES (?, ?, ?, ?)";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, getEmployeeID());
+                stmt.setString(2, DepartmentIdStr);
+                stmt.setString(3, String.valueOf(Date.valueOf(LocalDate.now())));
+                stmt.setString(4, PositionStr);
+                stmt.executeUpdate();
+                Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "EmployeeDepartment added successfully.");
+                alert.showAndWait();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
         else {
@@ -222,19 +250,28 @@ public class EmployeePresenter {
     private void handleDelete(){
         if (connection.getUserRole() == dbConnection.UserRole.ADMIN) {
             try {
+
+                // Prepare the delete statement
+                String sql2 = "DELETE FROM EmployeeDepartment WHERE employee_id = ?";
+                PreparedStatement stmt2 = conn.prepareStatement(sql2);
+                stmt2.setString(1, EmployeeID);
+                // Execute the delete statement
+                int rowsDeleted2 = stmt2.executeUpdate();
+
                 // Prepare the delete statement
                 String sql = "DELETE FROM employee WHERE employee_id = ?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, EmployeeID);
-
                 // Execute the delete statement
                 int rowsDeleted = stmt.executeUpdate();
-                if (rowsDeleted > 0) {
+
+                if (rowsDeleted > 0 && rowsDeleted2 >0) {
                     name.setText("");
                     age.setText("");
                     address.setText("");
                     email.setText("");
                     phone_number.setText("");
+                    position.setText("");
                     department.getSelectionModel().select(0);
                     Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Employee deleted successfully.");
                     alert.showAndWait();
