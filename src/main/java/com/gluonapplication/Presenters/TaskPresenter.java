@@ -108,11 +108,20 @@ public class TaskPresenter {
     private void displayRowData() {
         TaskTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                DatabaseDTO selectedDepartment = (DatabaseDTO) newSelection;
+                DatabaseDTO selectedDepartment = newSelection;
                 TaskID = selectedDepartment.getRow(0).get();
                 task.setText(selectedDepartment.getRow(1).get());
             }
         });
+        /*AssignTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                DatabaseDTO selectedDepartment = newSelection;
+                name = getEmploye()selectedDepartment.getRow(0).get();
+                TaskID = selectedDepartment.getRow(0).get();
+                task.setText(selectedDepartment.getRow(1).get());
+                task.setText(selectedDepartment.getRow(1).get());
+            }
+        });*/
     }
 
     @FXML
@@ -122,7 +131,7 @@ public class TaskPresenter {
             String EmployeeIDStr = getEmployeeID(name.getValue().toString());
             String DepartmentIdStr = getDepartmentId(EmployeeIDStr);
             try {
-                if (TaskStr != "") {
+                if (getTaskID() == null) {
                     String sql = "INSERT INTO tasks (task_name,department_id,employee_id) VALUES (?,?,?)";
                     PreparedStatement stmt = conn.prepareStatement(sql);
                     stmt.setString(1, TaskStr);
@@ -138,20 +147,22 @@ public class TaskPresenter {
                 e.printStackTrace();
             }
             try {
-                String sql = "INSERT INTO EmployeeTaskAssignments (employee_id,task_id,date_assigned, status) VALUES (?,?,?,?)";
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setString(1, EmployeeIDStr);
-                stmt.setString(2, getTaskID());
-                stmt.setString(3, String.valueOf(Date.valueOf(date.getValue())));
-                if (status.isSelected())
-                    stmt.setString(4, "Completed");
-                else
-                    stmt.setString(4, "In Progress ..");
-                stmt.executeUpdate();
+                if (getTaskID() != null) {
+                    String sql = "INSERT INTO EmployeeTaskAssignments (employee_id,task_id,date_assigned, status) VALUES (?,?,?,?)";
+                    PreparedStatement stmt = conn.prepareStatement(sql);
+                    stmt.setString(1, EmployeeIDStr);
+                    stmt.setString(2, getTaskID());
+                    stmt.setString(3, String.valueOf(Date.valueOf(date.getValue())));
+                    if (status.isSelected())
+                        stmt.setString(4, "Completed");
+                    else
+                        stmt.setString(4, "In Progress ..");
+                    stmt.executeUpdate();
 
-                Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "New Assignment added successfully.");
-                alert.showAndWait();
-                displayAssignTable();
+                    Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "New Assignment added successfully.");
+                    alert.showAndWait();
+                    displayAssignTable();
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -201,22 +212,31 @@ public class TaskPresenter {
     @FXML
     private void handleEdit(){
        if (connection.getUserRole() == dbConnection.UserRole.ADMIN || connection.getUserRole() == dbConnection.UserRole.READER_WRITE) {
-            String TaskStr = task.getText().trim();
+           try {
+           String TaskStr = task.getText().trim();
            String EmployeeIDStr = getEmployeeID(name.getValue().toString());
-            String sql = "UPDATE tasks SET task_name=? WHERE task_id=?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                // set parameter values
-                stmt.setString(1, TaskStr);
-                stmt.setString(2, TaskID);
+           String sql = "UPDATE tasks SET task_name=? WHERE task_id=?";
+           PreparedStatement stmt = conn.prepareStatement(sql);
+           stmt.setString(1, TaskStr);
+           stmt.setString(2, TaskID);
+           // execute update task
+           stmt.executeUpdate();
 
-                // execute update
-                stmt.executeUpdate();
+           String sql2 = "UPDATE EmployeeTaskAssignments SET date_assigned=? , status=? WHERE task_id=? AND employee_id=?";
+           PreparedStatement stmt2 = conn.prepareStatement(sql2);
+           stmt2.setString(1, String.valueOf(date.getValue()));
+           stmt2.setString(2, status.getText());
+           stmt2.setString(3, TaskID);
+           stmt2.setString(4, EmployeeIDStr);
+           // execute update EmployeeTaskAssignments
+           stmt2.executeUpdate();
 
-                // show success message and clear text fields
-                Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task updated successfully");
-                alert.showAndWait();
+           // show success message and clear text fields
+           Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task updated successfully");
+           alert.showAndWait();
 
-                displayTaskTable();
+           displayTaskTable();
+           displayAssignTable();
             } catch (SQLException e) {
                 // show error message and log exception
                 System.err.println("Error updating task: " + e.getMessage());
@@ -251,9 +271,9 @@ public class TaskPresenter {
                     status.setSelected(false);
                     Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task deleted successfully.");
                     alert.showAndWait();
-                    displayAssignTable();
-                    displayTaskTable();
                 }
+                displayAssignTable();
+                displayTaskTable();
             } catch (SQLException e) {
                 Alert alert = new Alert(javafx.scene.control.Alert.AlertType.WARNING, "Error deleting Task: " + e.getMessage() );
                 alert.showAndWait();
@@ -265,20 +285,19 @@ public class TaskPresenter {
         }
     }
     private String getTaskID() {
-        if (TaskID == null) {
-            try {
-                String query = "SELECT task_id FROM tasks WHERE task_name = ?";
-                PreparedStatement statement = conn.prepareStatement(query);
-                statement.setString(1, task.getText().trim());
-                ResultSet resultSet = statement.executeQuery();
-                if (resultSet.next()) {
-                    return resultSet.getString("task_id");
-                } else return null;
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+        TaskID = null;
+        try {
+            String query = "SELECT task_id FROM tasks WHERE task_name = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, task.getText().trim());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                TaskID = resultSet.getString("task_id");
+            } else return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        else return TaskID;
+        return TaskID;
     }
 }
 
