@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 
 public class TaskPresenter {
@@ -78,12 +79,9 @@ public class TaskPresenter {
         name.getItems().removeAll(name.getItems());
         // Execute the query to retrieve department IDs from the department table
         String query = "SELECT name FROM employee";
-
         // Create a statement to execute SQL queries
         Statement statement = conn.createStatement();
-
         ResultSet resultSet = statement.executeQuery(query);
-
         // Populate the ComboBox with department IDs
         while (resultSet.next()) {
             String department_name =  resultSet.getString("name");
@@ -113,55 +111,51 @@ public class TaskPresenter {
                 task.setText(selectedDepartment.getRow(1).get());
             }
         });
-        /*AssignTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+        AssignTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 DatabaseDTO selectedDepartment = newSelection;
-                name = getEmploye()selectedDepartment.getRow(0).get();
-                TaskID = selectedDepartment.getRow(0).get();
-                task.setText(selectedDepartment.getRow(1).get());
-                task.setText(selectedDepartment.getRow(1).get());
+                TaskID = selectedDepartment.getRow(1).get();
             }
-        });*/
+        });
     }
 
     @FXML
     private void handleAdd(){
         if (connection.getUserRole() == dbConnection.UserRole.ADMIN || connection.getUserRole() == dbConnection.UserRole.READER_WRITE) {
-            String TaskStr = task.getText().trim();
-            String EmployeeIDStr = getEmployeeID(name.getValue().toString());
-            String DepartmentIdStr = getDepartmentId(EmployeeIDStr);
             try {
-                if (getTaskID() == null) {
-                    String sql = "INSERT INTO tasks (task_name,department_id,employee_id) VALUES (?,?,?)";
-                    PreparedStatement stmt = conn.prepareStatement(sql);
-                    stmt.setString(1, TaskStr);
-                    stmt.setString(2, DepartmentIdStr);
-                    stmt.setString(3, EmployeeIDStr);
-                    stmt.executeUpdate();
-
-                    Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task added successfully.");
+                String TaskStr = task.getText().trim();
+                String EmployeeIDStr = getEmployeeID(name.getValue().toString());
+                if (TaskStr != "" && date.getValue() != null && name.getValue() != null)  {
+                    if (!checkDuplicateTasks(TaskStr)) {
+                        String sql = "INSERT INTO tasks (task_name) VALUES (?)";
+                        PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                        stmt.setString(1, TaskStr);
+                        int affectedRows = stmt.executeUpdate();
+                        if (affectedRows > 0) {
+                            ResultSet generatedKeys = stmt.getGeneratedKeys();
+                            if (generatedKeys.next())
+                                TaskID = String.valueOf(generatedKeys.getLong(1));
+                        }
+                        displayTaskTable();
+                    }
+                    if (!checkDuplicateTaskAssignment(TaskID, EmployeeIDStr)) {
+                        String sql2 = "INSERT INTO EmployeeTaskAssignments (employee_id,task_id,date_assigned, status) VALUES (?,?,?,?)";
+                        PreparedStatement stmt2 = conn.prepareStatement(sql2);
+                        stmt2.setString(1, EmployeeIDStr);
+                        stmt2.setString(2, TaskID);
+                        stmt2.setString(3, String.valueOf(Date.valueOf(date.getValue())));
+                        if (status.isSelected())
+                            stmt2.setString(4, "Completed");
+                        else
+                            stmt2.setString(4, "In Progress ..");
+                        stmt2.executeUpdate();
+                        Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task " + TaskID + " New Assignment added successfully.");
+                        alert.showAndWait();
+                        displayAssignTable();
+                    }
+                } else {
+                    Alert alert = new Alert(javafx.scene.control.Alert.AlertType.WARNING, "Please check out all required fields");
                     alert.showAndWait();
-                    displayTaskTable();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (getTaskID() != null) {
-                    String sql = "INSERT INTO EmployeeTaskAssignments (employee_id,task_id,date_assigned, status) VALUES (?,?,?,?)";
-                    PreparedStatement stmt = conn.prepareStatement(sql);
-                    stmt.setString(1, EmployeeIDStr);
-                    stmt.setString(2, getTaskID());
-                    stmt.setString(3, String.valueOf(Date.valueOf(date.getValue())));
-                    if (status.isSelected())
-                        stmt.setString(4, "Completed");
-                    else
-                        stmt.setString(4, "In Progress ..");
-                    stmt.executeUpdate();
-
-                    Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "New Assignment added successfully.");
-                    alert.showAndWait();
-                    displayAssignTable();
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -173,22 +167,16 @@ public class TaskPresenter {
         }
     }
 
-    private String getDepartmentId(String employeeIDStr) {
-        // Retrieve the department ID based on the department name from the database
-        String departmentId = null;
-        try {
-            String query = "SELECT department_id FROM employee WHERE employee_id = ?";
-            PreparedStatement statement = conn.prepareStatement(query);
-            statement.setString(1, employeeIDStr);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                departmentId = resultSet.getString("department_id");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception
+    private boolean checkDuplicateTasks(String taskStr) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM tasks WHERE task_name = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, taskStr);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
         }
-        return departmentId;
+        return false;
     }
 
     private String getEmployeeID(String name) {
@@ -214,29 +202,33 @@ public class TaskPresenter {
        if (connection.getUserRole() == dbConnection.UserRole.ADMIN || connection.getUserRole() == dbConnection.UserRole.READER_WRITE) {
            try {
            String TaskStr = task.getText().trim();
+           if (!checkDuplicateTasks(TaskStr)) {
+               String sql = "UPDATE tasks SET task_name=? WHERE task_id=?";
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               stmt.setString(1, TaskStr);
+               stmt.setString(2, TaskID);
+               // execute update task
+               stmt.executeUpdate();
+               // show success message and clear text fields
+               Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task updated successfully");
+               alert.showAndWait();
+               displayTaskTable();
+           }
            String EmployeeIDStr = getEmployeeID(name.getValue().toString());
-           String sql = "UPDATE tasks SET task_name=? WHERE task_id=?";
-           PreparedStatement stmt = conn.prepareStatement(sql);
-           stmt.setString(1, TaskStr);
-           stmt.setString(2, TaskID);
-           // execute update task
-           stmt.executeUpdate();
-
-           String sql2 = "UPDATE EmployeeTaskAssignments SET date_assigned=? , status=? WHERE task_id=? AND employee_id=?";
-           PreparedStatement stmt2 = conn.prepareStatement(sql2);
-           stmt2.setString(1, String.valueOf(date.getValue()));
-           stmt2.setString(2, status.getText());
-           stmt2.setString(3, TaskID);
-           stmt2.setString(4, EmployeeIDStr);
-           // execute update EmployeeTaskAssignments
-           stmt2.executeUpdate();
-
-           // show success message and clear text fields
-           Alert alert = new Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Task updated successfully");
-           alert.showAndWait();
-
-           displayTaskTable();
-           displayAssignTable();
+           if (checkDuplicateTaskAssignment(TaskID,EmployeeIDStr)) {
+               String sql2 = "UPDATE EmployeeTaskAssignments SET date_assigned=? , status=? WHERE task_id=? AND employee_id=?";
+               PreparedStatement stmt2 = conn.prepareStatement(sql2);
+               stmt2.setString(1, String.valueOf(date.getValue()));
+               if (status.isSelected())
+                   stmt2.setString(2, "Completed");
+               else
+                   stmt2.setString(2, "In Progress ..");
+               stmt2.setString(3, TaskID);
+               stmt2.setString(4, EmployeeIDStr);
+               // execute update EmployeeTaskAssignments
+               stmt2.executeUpdate();
+               displayAssignTable();
+           }
             } catch (SQLException e) {
                 // show error message and log exception
                 System.err.println("Error updating task: " + e.getMessage());
@@ -284,20 +276,17 @@ public class TaskPresenter {
             alert.showAndWait();
         }
     }
-    private String getTaskID() {
-        TaskID = null;
-        try {
-            String query = "SELECT task_id FROM tasks WHERE task_name = ?";
-            PreparedStatement statement = conn.prepareStatement(query);
-            statement.setString(1, task.getText().trim());
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                TaskID = resultSet.getString("task_id");
-            } else return null;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    private boolean checkDuplicateTaskAssignment(String taskId, String employeeId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM EmployeeTaskAssignments WHERE task_id = ? AND employee_id = ?";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.setString(1, taskId);
+        stmt.setString(2, employeeId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
         }
-        return TaskID;
+        return false;
     }
 }
 
